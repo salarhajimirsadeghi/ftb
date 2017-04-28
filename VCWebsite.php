@@ -3,13 +3,29 @@
 // ShoppingCard object, this must be done before session_start().
 //require "C:/xampp/htdocs/cart.php";
 include('dbconn.php');
-session_start();
+
 $dbname = "VCs";
-$conn = mysqli($dbname);
-if($conn -> connect_error){
-  die("Connection failed: " . $conn->connect_error);
-}
-$sql = $conn->prepare("SELECT Companies WHERE Name");
+$conn = connect_to_db($dbname);
+session_start();
+$vcName = $_GET["vc"];
+echo "Your VC Choice is " . $vcName;
+
+$vcQuery = "SELECT VC_NAME, DESCRIPTION, IMAGE from VCs where VC_Name = $vcName";
+$vc = $conn->prepare($vcQuery);
+
+$companyQuery = "SELECT CID from VC_COMPANY where VID = $vcName";
+$company = $conn->prepare($companyQuery);
+
+$companyNameQuery = "SELECT COMPANY_NAME, IMAGE FROM COMPANIES WHERE CID = $company";
+$companyName = $conn -> prepare($companyNameQuery);
+
+
+//$gSelect->bind_param("s", $gname);
+
+//if($conn -> connect_error){
+  //die("Connection failed: " . $conn->connect_error);
+//}
+//$sql = $conn->prepare("SELECT Companies WHERE Name");
 
 //print_r($_SESSION);
 //echo "<br>after starting a session in viewcart...";
@@ -47,9 +63,11 @@ $sql = $conn->prepare("SELECT Companies WHERE Name");
       </tr>
 
   <p><?php
-    while($row = $sql->fetch()){
+
+
+    while($row = mysql_fetch_array($companyName)){
     echo "<tr>";
-    echo "<td>". $row['companyName'] . "<img src = ". row['Picture'] . " alt = 'companyPic' style = ' width: 30px; height: 30px'></td>"
+    echo "<td>". $row['COMPANY_NAME'] . "<img src = 'data:image/jpeg;base64,'". base64_encode($row['IMAGE']) . " alt = 'companyPic' style = ' width: 30px; height: 30px'></td>";
   }
   echo "</table>"
 
