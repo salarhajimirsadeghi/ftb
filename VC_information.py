@@ -1,3 +1,4 @@
+from __future__ import print_function
 from urllib.request import urlopen
 from urllib.error import HTTPError
 import requests
@@ -6,14 +7,41 @@ import sys
 import math
 from operator import add
 from os.path import join, isfile, dirname
-
-
-
+from datetime import date, datetime, timedelta
+import mysql.connector
+ 
 # Can be seen by entire program
 organizations = {}
 VC_Investments = {}
 global investor_counter
 all_investments = set()
+
+
+
+############ Database Information ######### 
+HOST = "localhost"
+USER = "root"
+PASSWD = "root"
+DATABASE = "VCs"
+ 
+cnx = mysql.connector.connect(host=HOST, user=USER, passwd=PASSWD, database=DATABASE)
+cursor = cnx.cursor()
+
+############ Storing API data into MYSQL ############
+def store_vc_data(VC_NAME, PERMA_LINK, IMAGE, DESCRIPTION, URL, UUID, 
+				ADDRESS, CITY, ZIPCODE, STATE):
+
+    insert_query = ("INSERT INTO VCs (VID, VC_NAME, PERMA_LINK, IMAGE, DESCRIPTION, URL, UUID, \
+    								ADDRESS, CITY, ZIPCODE, STATE) VALUES \
+									(%i, %s, %s, %s, %s, %s, %i, %s, %s, %i, %s)")
+    cursor.execute(insert_query, (VC_NAME, PERMA_LINK, IMAGE, DESCRIPTION, URL, UUID, 
+				ADDRESS, CITY, ZIPCODE, STATE))
+
+    cnx.commit()
+    
+    return
+#########################################################
+
 
 
 #Function that just adds to our VC organization dictionary (used since more than 1 page of VCs)
@@ -106,7 +134,7 @@ try:
 	
 
 	#Just counting up to page 2 for now...
-	for x in range (1, 32):
+	for x in range (1, 1):
 		print("there are more pages. Wer're on page: " + str(x)	) 
 		r = requests.get(jsonResponse["data"]["paging"]["next_page_url"] + "&user_key=4c3b3f5bc197608d9e93bfbda7be32e2")		
 		jsonResponse = r.json()
@@ -118,108 +146,27 @@ try:
 	number_of_vcs = len(organizations)
 	print("There are " + str(number_of_vcs) + " VCs, in this set")		
 	
-
-
-	# #############################################################################################
-	# # Figuring out all the VCs Investments
-	# # key is the name of the VCs
-	# for key in organizations:
-	
-	# 	permalink = organizations[key][1]
-	# 	url = 'https://api.crunchbase.com/v/3/organizations/'+ permalink +'/investments?user_key=4c3b3f5bc197608d9e93bfbda7be32e2'
-	# 	r = requests.get(url)
-	# 	jsonForm = r.json()
-
-	# 	#temporary variable to hold a list of all investments	
-	# 	companies = []
-	# 	invest_page = jsonForm["data"]["paging"]["number_of_pages"]
-	# 	#if there are more than 1 page of investments
-	# 	if ( invest_page > 1):
-	# 		for i in range (1, invest_page):
-				
-	# 			r = requests.get(jsonResponse["data"]["paging"]["next_page_url"] + "&user_key=4c3b3f5bc197608d9e93bfbda7be32e2")
-	# 			jsonResponse = r.json()
-				
-	# 			try:	
-	# 				add_investments(key, jsonForm["data"]["items"])
-	# 			except:
-	# 				add_investments(key, jsonForm["data"]["item"])
-				
-					
-		
-	# 	#makes a dictionary with (name: [investments uuid format])
-	# 	else:						
-	# 		try:  			
-	# 			for company in jsonForm["data"]["items"]:
-	# 				companies.append(company["relationships"]["funding_round"]["relationships"]["funded_organization"]["properties"]["name"])
-	# 		except:
-	# 			try:
-	# 				company  = jsonForm["data"]["item"]			
-	# 				companies.append(company["relationships"]["funding_round"]["relationships"]["funded_organization"]["properties"]["name"])
-	# 			except: 
-	# 				continue								
-	
-	# 	all_investments.update(companies)
-	# 	VC_id = organizations[key][3]
-	# 	VC_Investments[VC_id] = companies
-
-	
-	# # Creates a dictionary with company_name(key) and id(value)
-	# # (company_name, id)	
-	# investments_dict = {}
-	# company_counter = 0
-	# for company in all_investments:
-	# 	investments_dict[company] = company_counter
-	# 	company_counter += 1
-
  
+	######## Writing to Database #########
 
-	fileHandle = open('VC_Info.txt', 'w')	
-		
 	for vc in organizations:
-		fileHandle.write(str(vc) + str(organizations[vc]) + "\n")
-
-	fileHandle.close()
-
-	print ("finished writing file")
-
-	#a list of all the VCs (id) and investments (company id) in a tuple
-	# (53, 123), (53, 765), ...
-	# Main_Data = []
-
-	#adds the ids of companies that a specific VC invested 
-	#in into a temporary list 
-	# for vc_id in VC_Investments:
-	# 	invest_comp_id = []
-	# 	for comp in VC_Investments[vc_id]:
-	# 		invest_comp_id.append(investments_dict[comp])
-
-	# 	#makes sure no duplicates
-	# 	inv_comp_id_set = set(invest_comp_id)
-	# 	invest_comp_id = list(inv_comp_id_set)
-	# 	invest_comp_id.sort()	
-		
-	# 	for x in invest_comp_id:
-	# 		Main_Data.append((vc_id, x))
-	# 		fileHandle.write(str(vc_id) + ";" + str(x) + "\n")
+		# print (len(organizations[vc]))
+		data = organizations[vc]
+		store_vc_data(data[0],data[1],data[2],data[3],data[4],data[5],data[6,data[7]],data[8],data[9])
 	
-	
-	# fileHandle.close()
+	######################################
 
-	# fileHandle = open("VC_Stats.txt", 'w')
-	# fileHandle.write("number of total investments:" + str(company_counter))
-	# fileHandle.close()
-		
-	# print(Main_Data)
+	print ("finished uploading all data into Database")
 
 
-	# if 1-100 training, 101 - 200 validation, else testing
 
 except requests.exceptions.RequestException as e: 
     print (e)
     sys.exit(1)
 
-
+#closes DB Connection
+cursor.close()
+cnx.close()			
 
 
 

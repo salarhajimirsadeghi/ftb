@@ -1,3 +1,4 @@
+from __future__ import print_function
 from urllib.request import urlopen
 from urllib.error import HTTPError
 import requests
@@ -6,11 +7,47 @@ import sys
 import math
 from operator import add
 from os.path import join, isfile, dirname
-
-
-
+from datetime import date, datetime, timedelta
+import mysql.connector
 
 VC_Investments = {}
+
+
+############ Database Information ######### 
+HOST = "localhost"
+USER = "root"
+PASSWD = "root"
+DATABASE = "VCs"
+ 
+cnx = mysql.connector.connect(host=HOST, user=USER, passwd=PASSWD, database=DATABASE)
+cursor = cnx.cursor()
+
+############ Storing API data into MYSQL ############
+def store_vc_data(COMPANY_NAME, PERMA_LINK, IMAGE, DESCRIPTION, URL, UUID, TOTAL_FUNDING):
+
+    insert_query = ("INSERT INTO COMPANIES (VID, VC_NAME, PERMA_LINK, IMAGE, DESCRIPTION, URL, UUID, \
+    								TOTAL_FUNDING) VALUES \
+									(%i, %s, %s, %s, %s, %s, %i, %f)")
+    cursor.execute(insert_query, (COMPANY_NAME, PERMA_LINK, IMAGE, DESCRIPTION, URL, UUID, 
+					TOTAL_FUNDING))
+
+    cnx.commit()
+    
+    return
+
+
+####### Need to link VID and CID ####
+def store_vc_company(VC_NAME, COMPANY_NAME):
+
+	insert_query = ("INSERT INTO VC_COMPANY (VC_NAME, COMPANY_NAME) VALUES \
+									(%s, %s)")
+    cursor.execute(insert_query, (VC_NAME, COMPANY_NAME))
+
+    cnx.commit()
+    
+    return
+#########################################################
+
 
 
 vc_url = 'https://api.crunchbase.com/v/3/organizations?categories=Venture%20Capital&locations=United%20States&user_key=4c3b3f5bc197608d9e93bfbda7be32e2'
@@ -75,16 +112,27 @@ try:
 						investors.append(investor_name)
 					except: 
 						continue
-
-
-				# (company_name: (#0 uuid, #1 short_descr, #2 profile_image, #3 total_fund, #4 homepage_url, #5 name))
-				companies[name] = (uuid, permalink, short_description, profile_image_url, total_funding, homepage_url, investors)
-
+		
+		
 				#adds that company(as a dictionary) into a dictionary of all the companies that a specific VC has invested in
 				#dictionary within a dictionary
+				# (company_name: (#0 name, #1 permalink, #2 profile_image, #3 description, #4 homepage_url, #5 uuid,
+								  #6 total_funding, #7 investors))
+				companies[name] = (name, permalink, image, short_description,homepage_url, uuid, total_funding, investors)			
 
 			####### (VC: [all companies they invested in])	
 			VC_Investments[VC_name] = companies
+
+			######## Writing to Database #########
+			for company in companies:
+				# print (len(organizations[vc]))
+				data = companies[company]
+				store_vc_data(data[0],data[1],data[2],data[3],data[4],data[5],data[6])
+				store_vc_company(VC_NAME, company)
+			######################################
+	
+
+
 		except:
 			continue
 
@@ -93,20 +141,7 @@ except requests.exceptions.RequestException as e:
     sys.exit(1)
 
 
-
-
-######### WRITE FILE to txt  ######
-
-
-	# fileHandle = open('Company_Info.txt', 'w')	
-		
-	# for vc in organizations:
-	# 	fileHandle.write(str(vc) + str(organizations[vc]) + "\n")
-
-	# fileHandle.close()
-
-	# print ("finished writing file")
-
-
+cursor.close()
+cnx.close()			
 
 
