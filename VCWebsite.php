@@ -10,14 +10,29 @@ session_start();
 $vcName = $_GET["vc"];
 echo "Your VC Choice is " . $vcName;
 
-$vcQuery = "SELECT VC_NAME, DESCRIPTION, IMAGE from VCs where VC_Name = $vcName";
+$vcQuery = "SELECT VC_NAME, DESCRIPTION, IMAGE, VID from VCs where VC_NAME = $vcName";
+//$vcQuery = "SELECT VID from VCs where VC_NAME = $vcName";
 $vc = $conn->prepare($vcQuery);
 
-$companyQuery = "SELECT CID from VC_COMPANY where VID = $vcName";
-$company = $conn->prepare($companyQuery);
-
-$companyNameQuery = "SELECT COMPANY_NAME, IMAGE FROM COMPANIES WHERE CID = $company";
-$companyName = $conn -> prepare($companyNameQuery);
+echo($vc);
+//run a for loop over result
+//store each element into a different variable
+//pass that into the companyQuery VID
+$companyQuery ="";
+foreach($vc as $res){
+  $theVID = $res['VID'];
+  $companyQuery = "SELECT CID from VC_COMPANY where VID = $theVID";
+  $company = $conn->prepare($companyQuery);
+}
+// $companyQuery = "SELECT CID from VC_COMPANY where VID = $vc['VID']";
+// $company = $conn->prepare($companyQuery);
+//search how to iterate over a query select result
+$companyName = "";
+foreach($companyQuery as $cRes){
+  $theCID = $cRes['CID'];
+  $companyNameQuery = "SELECT COMPANY_NAME, IMAGE FROM COMPANIES WHERE CID = $theCID";
+  $companyName = $conn -> prepare($companyNameQuery);
+}
 
 
 //$gSelect->bind_param("s", $gname);
@@ -65,25 +80,11 @@ $companyName = $conn -> prepare($companyNameQuery);
   <p><?php
 
 
-    while($row = mysql_fetch_array($companyName)){
+    while($row = mysql_fetch_row($companyName)){
     echo "<tr>";
     echo "<td>". $row['COMPANY_NAME'] . "<img src = 'data:image/jpeg;base64,'". base64_encode($row['IMAGE']) . " alt = 'companyPic' style = ' width: 30px; height: 30px'></td>";
   }
-  echo "</table>"
-
-
-
-  //  echo"<table>
-    //<thead>
-  //   <tr>
-  //     <th>Companies Invested In</th>
-  //   </tr>
-  //   </thead>";
-  //
-  //
-  // echo "</table>";
-  // echo "<input type ='submit' value = 'Update' name = 'submitButton'>" . "</input>" ;
-
+  echo "</table>";
 
   ?></p>
 </div>
