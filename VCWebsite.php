@@ -2,37 +2,58 @@
 // Include the ShoppingCart class.  Since the session contains a
 // ShoppingCard object, this must be done before session_start().
 //require "C:/xampp/htdocs/cart.php";
-include('dbconn.php');
-
-$dbname = "VCs";
-$conn = connect_to_db($dbname);
+//include('dbconn.php');
+$dbc = mysql_connect( "localhost", "root", "");
+mysql_select_db("vcs", $dbc);
+// $dbname = "VCs";
+// $conn = connect_to_db($dbname);
 session_start();
 $vcName = $_GET["vc"];
 echo "Your VC Choice is " . $vcName;
 
-$vcQuery = "SELECT VC_NAME, DESCRIPTION, IMAGE, VID from VCs where VC_NAME = $vcName";
+//$vcQuery = [];
+$vcQuery = "SELECT VID from VCs where VC_NAME = $vcName";
+//VC_NAME, DESCRIPTION, IMAGE,
 //$vcQuery = "SELECT VID from VCs where VC_NAME = $vcName";
-$vc = $conn->prepare($vcQuery);
+$vc = mysql_query($vcQuery);
 
-echo($vc);
+echo("*******************" . $vc);
 //run a for loop over result
 //store each element into a different variable
 //pass that into the companyQuery VID
-$companyQuery ="";
-foreach($vc as $res){
-  $theVID = $res['VID'];
-  $companyQuery = "SELECT CID from VC_COMPANY where VID = $theVID";
-  $company = $conn->prepare($companyQuery);
-}
+//$companyQuery =[];
+$companyIDQuery = "";
+$companyArr = array();
+//foreach($vc as $res){
+  //$theVID = $res['VID'];
+  $companyIDQuery = "SELECT CID from VC_COMPANY where VID = $vc";
+  $companyID = mysql_query($companyIDQuery);
+
+  foreach ($companyID as $comp) {// for each compqny put that in an array.....
+    array_push($companyArr, $comp);
+//store that result in an array ** TODO **
+   }
+
+
+//}
+
 // $companyQuery = "SELECT CID from VC_COMPANY where VID = $vc['VID']";
 // $company = $conn->prepare($companyQuery);
 //search how to iterate over a query select result
-$companyName = "";
-foreach($companyQuery as $cRes){
-  $theCID = $cRes['CID'];
-  $companyNameQuery = "SELECT COMPANY_NAME, IMAGE FROM COMPANIES WHERE CID = $theCID";
-  $companyName = $conn -> prepare($companyNameQuery);
+//$companyName = [];
+//$companyNameQuery = [];
+$companyNameQuery = "";
+$companyNameArr = array();
+foreach($companyArr as $cRes){
+  //$theCID = $cRes['CID'];
+  $companyNameQuery = "SELECT COMPANY_NAME, IMAGE FROM COMPANIES WHERE CID = $cRes";
+  $row = mysql_query($companyNameQuery);
+  $companyNameArr[$row['COMPANY_NAME']]= $row['IMAGE'];
+
+  //store that result in an array -** TODO **
+
 }
+
 
 
 //$gSelect->bind_param("s", $gname);
@@ -80,9 +101,9 @@ foreach($companyQuery as $cRes){
   <p><?php
 
 
-    while($row = mysql_fetch_row($companyName)){
+    foreach($companyNameArr as $name => $image){
     echo "<tr>";
-    echo "<td>". $row['COMPANY_NAME'] . "<img src = 'data:image/jpeg;base64,'". base64_encode($row['IMAGE']) . " alt = 'companyPic' style = ' width: 30px; height: 30px'></td>";
+    echo "<td>". $name . "<img src = 'data:image/jpeg;base64,'". base64_encode($image) . " alt = 'companyPic' style = ' width: 30px; height: 30px'></td>";
   }
   echo "</table>";
 
