@@ -17,6 +17,12 @@ $vcQuery = "SELECT VID from VCs where VC_NAME = $vcName";
 //$vcQuery = "SELECT VID from VCs where VC_NAME = $vcName";
 $vc = mysqli_query($dbc, $vcQuery);
 
+$vcDescriptionQuery = "SELECT DESCRIPTION from VCs where VC_NAME = $vcName";
+$vcDescription = mysqli_query($dbc, $vcDescriptionQuery);
+
+$vcImageQuery = "SELECT IMAGE from VCs where VC_NAME = $vcName";
+$vcImage = mysqli_query($dbc, $vcImageQuery);
+
 echo("*******************" . $vc);
 //run a for loop over result
 //store each element into a different variable
@@ -28,7 +34,6 @@ $companyArr = array();
   //$theVID = $res['VID'];
   $companyIDQuery = "SELECT CID from VC_COMPANY where VID = $vc";
   $companyID = mysqli_query($dbc, $companyIDQuery);
-
   foreach ($companyID as $comp) {// for each compqny put that in an array.....
     array_push($companyArr, $comp);
 //store that result in an array ** TODO **
@@ -68,6 +73,7 @@ foreach($companyArr as $cRes){
 ?>
 
 
+
 <!DOCTYPE html>
 <html>
 <head>
@@ -78,17 +84,19 @@ foreach($companyArr as $cRes){
   <center>
 <div id = "header-content">
   <div id = "VCPic">
-    <img src = "" alt = "VCPic" style = "width: 50%; height: 29%;">
+    <<?php
+    echo "<img src = 'data:image/jpeg;base64'". base64_encode($vcImage) . "alt = 'VCPic' style = 'width: 50%; height: 29%;'";
+    ?>>
   </div>
   <div id = "VCContainer">
-    <h1 id = "companyName"> VC Name</h1>
+    <h1 id = "vcCompanyName"> <<?php echo" ". $vcName . " " ?>></h1>
   </div>
 </div>
 </center>
 <center>
 <div id = "middle-content">
   <h2>Description</h2>
-  <h3><p id = "description"></p></h3>
+  <h3><p id = "description"><<?php echo " " . $vcDescription . " " ?>></p></h3>
 </div>
 </center>
 <center>
