@@ -3,8 +3,8 @@
 // ShoppingCard object, this must be done before session_start().
 //require "C:/xampp/htdocs/cart.php";
 //include('dbconn.php');
-$dbc = mysql_connect( "localhost", "root", "");
-mysql_select_db("vcs", $dbc);
+$dbc = mysqli_connect( "localhost", "root", "", "vcs");
+//mysql_select_db("vcs", $dbc);
 // $dbname = "VCs";
 // $conn = connect_to_db($dbname);
 session_start();
@@ -15,7 +15,7 @@ echo "Your VC Choice is " . $vcName;
 $vcQuery = "SELECT VID from VCs where VC_NAME = $vcName";
 //VC_NAME, DESCRIPTION, IMAGE,
 //$vcQuery = "SELECT VID from VCs where VC_NAME = $vcName";
-$vc = mysql_query($vcQuery);
+$vc = mysqli_query($dbc, $vcQuery);
 
 echo("*******************" . $vc);
 //run a for loop over result
@@ -27,7 +27,7 @@ $companyArr = array();
 //foreach($vc as $res){
   //$theVID = $res['VID'];
   $companyIDQuery = "SELECT CID from VC_COMPANY where VID = $vc";
-  $companyID = mysql_query($companyIDQuery);
+  $companyID = mysqli_query($dbc, $companyIDQuery);
 
   foreach ($companyID as $comp) {// for each compqny put that in an array.....
     array_push($companyArr, $comp);
@@ -47,7 +47,7 @@ $companyNameArr = array();
 foreach($companyArr as $cRes){
   //$theCID = $cRes['CID'];
   $companyNameQuery = "SELECT COMPANY_NAME, IMAGE FROM COMPANIES WHERE CID = $cRes";
-  $row = mysql_query($companyNameQuery);
+  $row = mysqli_query($dbc, $companyNameQuery);
   $companyNameArr[$row['COMPANY_NAME']]= $row['IMAGE'];
 
   //store that result in an array -** TODO **
