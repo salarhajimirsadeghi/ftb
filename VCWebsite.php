@@ -9,14 +9,15 @@ $dbc = mysqli_connect( "localhost", "root", "", "vcs");
 // $conn = connect_to_db($dbname);
 session_start();
 $vcName = $_GET["vc"];
-echo "Your VC Choice is " . $vcName;
+//echo "Your VC Choice is " . $vcName;
 //$vcQuery = [];
 $vcQuery = "SELECT VID FROM VCs WHERE VC_NAME = '$vcName'";
 //echo "Your VC Choice is " . $vcName;
 //VC_NAME, DESCRIPTION, IMAGE,
 //$vcQuery = "SELECT VID from VCs where VC_NAME = $vcName";
 $vc = mysqli_query($dbc, $vcQuery) or die( "bad query".mysqli_error( $dbc ) );
-
+$row9 = mysqli_fetch_assoc($vc);
+$vcid = $row9['VID'];
 //echo "Your VC Choice is " . $vcName;
 $vcDescriptionQuery = "SELECT DESCRIPTION from VCs where VC_NAME = '$vcName'";
 $vcDescription = mysqli_query($dbc, $vcDescriptionQuery) or die( "bad query".mysqli_error( $dbc ) );
@@ -24,22 +25,24 @@ $row1 = mysqli_fetch_assoc($vcDescription);
 $des = $row1['DESCRIPTION'];
 $vcImageQuery = "SELECT IMAGE from VCs where VC_NAME = '$vcName'";
 $vcImage = mysqli_query($dbc, $vcImageQuery) or die( "bad query".mysqli_error( $dbc ) );
+$row2 = mysqli_fetch_array($vcImage);
+$img = $row2['IMAGE'];
 
 //echo($vc);
 //run a for loop over result
 //store each element into a different variable
 //pass that into the companyQuery VID
 //$companyQuery =[];
-$companyIDQuery = "";
+//$companyIDQuery = "";
 $companyArr = array();
 //foreach($vc as $res){
   //$theVID = $res['VID'];
-  echo " VC is $vcName <br>";
-  $companyIDQuery = "SELECT CID from VC_COMPANY where VID = '$vcName'";
+  //echo " VC is $vcName <br>";
+  $companyIDQuery = "SELECT CID from VC_COMPANY where VID = '$vcid'";
   $companyID = mysqli_query($dbc, $companyIDQuery) or die( "bad query".mysqli_error( $dbc ) );
 
   //echo "******<br>";
-  print_r($companyID);
+  //print_r($companyID);
   //echo "*******<br>";
   foreach ($companyID as $comp) {// for each compqny put that in an array.....
     array_push($companyArr, $comp);
@@ -51,13 +54,24 @@ $companyArr = array();
 //search how to iterate over a query select result
 //$companyName = [];
 //$companyNameQuery = [];
-$companyNameQuery = "";
+//$companyNameQuery = "";
 $companyNameArr = array();
 foreach($companyArr as $cRes){
   //$theCID = $cRes['CID'];
-  $companyNameQuery = "SELECT COMPANY_NAME, IMAGE FROM COMPANIES WHERE CID = '$cRes'";
-  $row = mysqli_query($dbc, $companyNameQuery) or die( "bad query".mysqli_error( $dbc ) );
-  $companyNameArr[$row['COMPANY_NAME']]= $row['IMAGE'];
+  $companyNameQuery = "SELECT COMPANY_NAME FROM COMPANIES WHERE CID = '$cRes[CID]'";
+  $varrow = mysqli_query($dbc, $companyNameQuery) or die( "bad query".mysqli_error( $dbc ) );
+
+  $row10 = mysqli_fetch_array($varrow);
+  $compnamee = $row10['COMPANY_NAME'];
+  $companyImageQuery = "SELECT IMAGE FROM COMPANIES WHERE CID = '$cRes[CID]'";
+  $sarrow = mysqli_query($dbc, $companyImageQuery) or die( "bad query".mysqli_error( $dbc ) );
+
+  $row11 = mysqli_fetch_array($sarrow);
+  $compim = $row11['IMAGE'];
+
+  $companyNameArr[$compnamee] = $compim;
+
+  //$companyNameArr[$varrow['COMPANY_NAME']]= $varrow['IMAGE'];
   //store that result in an array -** TODO **
 }
 //$gSelect->bind_param("s", $gname);
@@ -80,7 +94,9 @@ foreach($companyArr as $cRes){
 <div id = "header-content">
   <div id = "VCPic">
     <?php
-    echo "<img src = 'data:image/jpeg;base64'". base64_encode('$vcImage') . "alt = 'VCPic' style = 'width: 50%; height: 29%;'";
+    //echo "<img src = 'data:image/jpeg;base64'". base64_encode('$img') . "alt = 'VCPic' style = 'width: 50%; height: 29%;'";
+    //echo $row2['$img'];
+    echo '<img src="'.$img.'" alt="HTML5 Icon" style="width: 50%; height: 29%">';
     ?>
   </div>
   <div id = "VCContainer">
@@ -98,15 +114,16 @@ foreach($companyArr as $cRes){
 <div id = "bottom-content">
   <table>
       <tr>
-        <th>Companies Invested In</th>
+        <th>Companies Invested In:</th>
       </tr>
       <p><?php
     foreach($companyNameArr as $name => $image){
-    echo "<tr>";
-    echo "<td>". $name . "<img src = 'data:image/jpeg;base64,'". base64_encode($image) . " alt = 'companyPic' style = ' width: 30px; height: 30px'></td>";
-  }
-  echo "</table>";
-  ?></p>
+      echo "<tr>";
+      //echo '<img src="'.$img.'" alt="HTML5 Icon" style="width: 50%; height: 29%">';
+      echo "<td>". $name . "            " .'<img src="'.$img.'" alt ="companyPic" style = "width: 30px; height: 20px"></td>';
+    }?>
+  </table>
+  </p>
 </div>
 </center>
 </body>
