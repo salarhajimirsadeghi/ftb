@@ -11,15 +11,21 @@ session_start();
 $vcName = $_GET["vc"];
 echo "Your VC Choice is " . $vcName;
 //$vcQuery = [];
-$vcQuery = "SELECT VID from VCs where VC_NAME = $vcName";
+$vcQuery = "SELECT VID FROM VCs WHERE VC_NAME = '$vcName'";
+//echo "Your VC Choice is " . $vcName;
 //VC_NAME, DESCRIPTION, IMAGE,
 //$vcQuery = "SELECT VID from VCs where VC_NAME = $vcName";
-$vc = mysqli_query($dbc, $vcQuery);
-$vcDescriptionQuery = "SELECT DESCRIPTION from VCs where VC_NAME = $vcName";
-$vcDescription = mysqli_query($dbc, $vcDescriptionQuery);
-$vcImageQuery = "SELECT IMAGE from VCs where VC_NAME = $vcName";
-$vcImage = mysqli_query($dbc, $vcImageQuery);
-echo($vc);
+$vc = mysqli_query($dbc, $vcQuery) or die( "bad query".mysqli_error( $dbc ) );
+
+//echo "Your VC Choice is " . $vcName;
+$vcDescriptionQuery = "SELECT DESCRIPTION from VCs where VC_NAME = '$vcName'";
+$vcDescription = mysqli_query($dbc, $vcDescriptionQuery) or die( "bad query".mysqli_error( $dbc ) );
+$row1 = mysqli_fetch_assoc($vcDescription);
+$des = $row1['DESCRIPTION'];
+$vcImageQuery = "SELECT IMAGE from VCs where VC_NAME = '$vcName'";
+$vcImage = mysqli_query($dbc, $vcImageQuery) or die( "bad query".mysqli_error( $dbc ) );
+
+//echo($vc);
 //run a for loop over result
 //store each element into a different variable
 //pass that into the companyQuery VID
@@ -28,12 +34,13 @@ $companyIDQuery = "";
 $companyArr = array();
 //foreach($vc as $res){
   //$theVID = $res['VID'];
-  echo "VC is $vcName <br>";
-  $companyIDQuery = "SELECT CID from VC_COMPANY where VID = '$vcName';";
-  $companyID = mysqli_query($dbc, $companyIDQuery) or  die( "bad query".mysqli_error( $dbc ) );
-  echo "******<br>";
+  echo " VC is $vcName <br>";
+  $companyIDQuery = "SELECT CID from VC_COMPANY where VID = '$vcName'";
+  $companyID = mysqli_query($dbc, $companyIDQuery) or die( "bad query".mysqli_error( $dbc ) );
+
+  //echo "******<br>";
   print_r($companyID);
-  echo "*******<br>";
+  //echo "*******<br>";
   foreach ($companyID as $comp) {// for each compqny put that in an array.....
     array_push($companyArr, $comp);
 //store that result in an array ** TODO **
@@ -48,8 +55,8 @@ $companyNameQuery = "";
 $companyNameArr = array();
 foreach($companyArr as $cRes){
   //$theCID = $cRes['CID'];
-  $companyNameQuery = "SELECT COMPANY_NAME, IMAGE FROM COMPANIES WHERE CID = $cRes";
-  $row = mysqli_query($dbc, $companyNameQuery);
+  $companyNameQuery = "SELECT COMPANY_NAME, IMAGE FROM COMPANIES WHERE CID = '$cRes'";
+  $row = mysqli_query($dbc, $companyNameQuery) or die( "bad query".mysqli_error( $dbc ) );
   $companyNameArr[$row['COMPANY_NAME']]= $row['IMAGE'];
   //store that result in an array -** TODO **
 }
@@ -62,8 +69,6 @@ foreach($companyArr as $cRes){
 //echo "<br>after starting a session in viewcart...";
 ?>
 
-
-
 <!DOCTYPE html>
 <html>
 <head>
@@ -75,7 +80,7 @@ foreach($companyArr as $cRes){
 <div id = "header-content">
   <div id = "VCPic">
     <?php
-    echo "<img src = 'data:image/jpeg;base64'". base64_encode($vcImage) . "alt = 'VCPic' style = 'width: 50%; height: 29%;'";
+    echo "<img src = 'data:image/jpeg;base64'". base64_encode('$vcImage') . "alt = 'VCPic' style = 'width: 50%; height: 29%;'";
     ?>
   </div>
   <div id = "VCContainer">
@@ -85,8 +90,8 @@ foreach($companyArr as $cRes){
 </center>
 <center>
 <div id = "middle-content">
-  <h2>Description</h2>
-  <h3><p id = "description"><?php echo " " . $vcDescription . " " ?></p></h3>
+  <h2>VC Firm Description:</h2>
+  <h3 id = "description"> <?php echo" " . $des . " " ?></h3>
 </div>
 </center>
 <center>
@@ -95,8 +100,7 @@ foreach($companyArr as $cRes){
       <tr>
         <th>Companies Invested In</th>
       </tr>
-
-  <p><?php
+      <p><?php
     foreach($companyNameArr as $name => $image){
     echo "<tr>";
     echo "<td>". $name . "<img src = 'data:image/jpeg;base64,'". base64_encode($image) . " alt = 'companyPic' style = ' width: 30px; height: 30px'></td>";
