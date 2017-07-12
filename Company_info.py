@@ -97,7 +97,7 @@ r = requests.get(vc_url)
 jsonResponse = r.json()
 organizations_list = jsonResponse["data"]["items"]
 
-for y in range (1, 3):
+for y in range (1, 10):
 	print("Wer're on page [VCs]: " + str(y)	) 
 	print ("next page url is: " + jsonResponse["data"]["paging"]["next_page_url"])
 	r = requests.get(jsonResponse["data"]["paging"]["next_page_url"] + "&user_key=4c3b3f5bc197608d9e93bfbda7be32e2")		

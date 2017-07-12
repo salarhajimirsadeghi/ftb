@@ -144,7 +144,7 @@ try:
 	
 
 	#Just counting up to page 2 for now...
-	for x in range (1, 3):
+	for x in range (1, 10):
 		print("there are more pages. Wer're on page: " + str(x)	) 
 		print ("next page url is: " + jsonResponse["data"]["paging"]["next_page_url"])
 		r = requests.get(jsonResponse["data"]["paging"]["next_page_url"] + "&user_key=4c3b3f5bc197608d9e93bfbda7be32e2")		

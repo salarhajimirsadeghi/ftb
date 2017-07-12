@@ -22,13 +22,13 @@ def grab_info():
 	vc_cursor = cnx.cursor(buffered=True)
 	cnx2 = mysql.connector.connect(host=HOST, user=USER, passwd=PASSWD, database=DATABASE)
 	company_cursor = cnx.cursor(buffered=True)
-<<<<<<< Updated upstream
-=======
+# <<<<<<< Updated upstream
+# =======
 	cnx3 = mysql.connector.connect(host=HOST, user=USER, passwd=PASSWD, database=DATABASE)
 	insert_cursor = cnx3.cursor(buffered=True)
 	cnx4 = mysql.connector.connect(host=HOST, user=USER, passwd=PASSWD, database=DATABASE)
 	checkD_cursor = cnx4.cursor(buffered = True)
->>>>>>> Stashed changes
+# >>>>>>> Stashed changes
 	
 
 	query2 = ("SELECT COMPANY_NAME, PERMA_LINK, CID FROM COMPANIES")	
@@ -37,11 +37,11 @@ def grab_info():
 
 	counter = 1
 	for (COMPANY_NAME, PERMA_LINK, CID) in company_cursor:
-<<<<<<< Updated upstream
-		print (COMPANY_NAME, PERMA_LINK, CID)
-=======
-		print ("***", COMPANY_NAME, PERMA_LINK, CID)
->>>>>>> Stashed changes
+# <<<<<<< Updated upstream
+		# print (COMPANY_NAME, PERMA_LINK, CID)
+# =======
+		# print ("***", COMPANY_NAME, PERMA_LINK, CID)
+# >>>>>>> Stashed changes
 		company_url = 'https://api.crunchbase.com/v/3/organizations/'+ PERMA_LINK +'?user_key=4c3b3f5bc197608d9e93bfbda7be32e2'
 		req = requests.get(company_url)
 		jsonT = req.json()
@@ -51,14 +51,14 @@ def grab_info():
 		company_investors = jsonT["data"]["relationships"]["investors"]["items"]
 
 		for investor in company_investors:
-<<<<<<< Updated upstream
+# <<<<<<< Updated upstream
 			
-			print(investor["properties"]["name"])
+			# print(investor["properties"]["name"])
 			investor_name = investor["properties"]["name"]
 				# t= (investor_name,)
 				# print (str(type(investor_name)) + ": " + investor_name)
 
-			query = ('SELECT EXISTS(SELECT VC_NAME, PERMA_LINK, VID FROM VCs WHERE VC_NAME = %s)' %investor_name)	
+			# query = ('SELECT EXISTS(SELECT VC_NAME, PERMA_LINK, VID FROM VCs WHERE VC_NAME = %s)' %investor_name)	
 			vc_cursor.execute(query)
 
 			# if vc_cursor.fetchone():
@@ -70,11 +70,11 @@ def grab_info():
 			# # print(vc_cursor)
 			# for row in vc_cursor:
 			# 	print (row)
-			print("Here 2")
-=======
+			# print("Here 2")
+# =======
 			cnx3.commit()
 			try: 
-				print("\t\t", investor["properties"]["name"])
+				# print("\t\t", investor["properties"]["name"])
 				investor_name = investor["properties"]["name"]
 					# t= (investor_name,)
 					# print (str(type(investor_name)) + ": " + investor_name)
@@ -91,7 +91,7 @@ def grab_info():
   					VC_NAME = row[0].strip()
 
   					checkD_query = ("SELECT VID, CID FROM VC_COMPANY WHERE VID ='%s' AND CID ='%s' " %(VID, CID))
-  					print (checkD_query)
+  					# print (checkD_query)
   					checkD_cursor.execute(checkD_query)
   					# print ("before checkDB is not none")
   					hasRow = checkD_cursor.fetchone()
@@ -125,7 +125,7 @@ def grab_info():
 			except:
 				# print ("ERROR")
 				continue
->>>>>>> Stashed changes
+# >>>>>>> Stashed changes
 
 
 
@@ -144,15 +144,15 @@ def grab_info():
 
 	cnx.close()
 	cnx2.close()
-<<<<<<< Updated upstream
+# <<<<<<< Updated upstream
 	company_cursor.close()	
 	vc_cursor.close()			
-=======
+# =======
 	cnx3.close()
 	company_cursor.close()	
 	vc_cursor.close()		
 	insert_cursor.close()
->>>>>>> Stashed changes
+# >>>>>>> Stashed changes
 	
 
 
